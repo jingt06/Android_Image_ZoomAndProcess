@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.FloatMath;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -18,7 +19,8 @@ import android.widget.RelativeLayout;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Touch";
-
+    private RelativeLayout container;
+    private ImageView myimage;
     //These matrices will be used to move and zoom image
     Matrix matrix = new Matrix();
     Matrix savedMatrix = new Matrix();
@@ -42,12 +44,28 @@ public class MainActivity extends AppCompatActivity {
     private float height;
     private float width;
     private RectF viewRect;
+    private PointF last = new PointF();
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if(hasFocus){
+            myimage = (ImageView)findViewById(R.id.img);
+            RectF drawableRect = new RectF(0, 0,width, height);
+            RectF viewRect = new RectF(0, 0, container.getWidth(), container.getHeight());
+            Log.e("debug",height+" "+width + " "+container.getWidth()+" "+
+                    container.getHeight()+" "+myimage.getHeight()+" "+myimage.getWidth()+" "+
+                    +myimage.getMeasuredHeight()+" "+myimage.getMeasuredWidth());
+            matrix.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
+            myimage.setImageMatrix(matrix);
+        }
+        //Here you can get the size!
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        final ImageView myimage = (ImageView)findViewById(R.id.img);
-        RelativeLayout container = (RelativeLayout) findViewById(R.id.container);
+        myimage = (ImageView)findViewById(R.id.img);
+        container = (RelativeLayout) findViewById(R.id.container);
         maxZoom = 10;
         minZoom = 0.25f;
         height = myimage.getDrawable().getIntrinsicHeight()+20;
@@ -55,10 +73,6 @@ public class MainActivity extends AppCompatActivity {
         viewRect = new RectF(0, 0, myimage.getWidth()+20, myimage.getHeight()+20);
         matrix = new Matrix(myimage.getImageMatrix());
         savedMatrix = new Matrix(myimage.getImageMatrix());
-        RectF drawableRect = new RectF(0, 0,container.getWidth(), container.getHeight());
-        RectF viewRect = new RectF(0, 0, container.getWidth(), container.getHeight());
-        matrix.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
-        myimage.setImageMatrix(matrix);
         myimage.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -66,12 +80,14 @@ public class MainActivity extends AppCompatActivity {
                 // Dump touch event to log
                 //dumpEvent(event);
                 // Handle touch events here...
+                PointF curr = new PointF(event.getX(), event.getY());
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
                         savedMatrix.set(matrix);
                         start.set(event.getX(), event.getY());
                         Log.e(TAG, "mode=DRAG");
                         mode = DRAG;
+                        last.set(curr);
                         break;
                     case MotionEvent.ACTION_POINTER_DOWN:
                         oldDist = spacing(event);
@@ -91,7 +107,10 @@ public class MainActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_MOVE:
                         if (mode == DRAW){ onTouchEvent(event);}
                         if (mode == DRAG) {
-                            ///code for draging..
+                            float deltaX = curr.x - last.x;
+                            float deltaY = curr.y - last.y;
+                            matrix.postTranslate(deltaX,deltaY);
+                            last.set(curr.x, curr.y);
                         }
                         else if (mode == ZOOM) {
                             float newDist = spacing(event);
