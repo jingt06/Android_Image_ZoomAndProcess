@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "Touch";
@@ -46,6 +47,16 @@ public class MainActivity extends AppCompatActivity {
     private RectF viewRect;
     private PointF last = new PointF();
 
+    //variable for counting two successive up-down events
+    int clickCount = 0;
+    //variable for storing the time of first click
+    long startTime;
+    //variable for calculating the total time
+    long duration;
+    //constant for defining the time duration between the click that can be considered as double-tap
+    static final int MAX_DURATION = 500;
+
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         if(hasFocus){
@@ -66,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         myimage = (ImageView)findViewById(R.id.img);
         container = (RelativeLayout) findViewById(R.id.container);
-        maxZoom = 10;
-        minZoom = 0.25f;
+        maxZoom = 15;
+        minZoom = 0.5f;
         height = myimage.getDrawable().getIntrinsicHeight()+20;
         width = myimage.getDrawable().getIntrinsicWidth()+20;
         viewRect = new RectF(0, 0, myimage.getWidth()+20, myimage.getHeight()+20);
@@ -88,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "mode=DRAG");
                         mode = DRAG;
                         last.set(curr);
+                        if(clickCount==0) {
+                            startTime = System.currentTimeMillis();
+                        }
+                        clickCount++;
                         break;
                     case MotionEvent.ACTION_POINTER_DOWN:
                         oldDist = spacing(event);
@@ -100,6 +115,17 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                     case MotionEvent.ACTION_UP:
+                        long time = System.currentTimeMillis() - startTime;
+                        if(clickCount == 2)
+                        {
+                            if(time<= MAX_DURATION)
+                            {
+                                Log.e(TAG,"duoble tap, duration: "+time);
+                            }
+                            clickCount = 0;
+                            break;
+                        }
+                        break;
                     case MotionEvent.ACTION_POINTER_UP:
                         mode = NONE;
                         Log.e(TAG, "mode=NONE");
