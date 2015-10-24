@@ -82,102 +82,100 @@ public class MainActivity extends AppCompatActivity {
         viewRect = new RectF(0, 0, myimage.getWidth()+20, myimage.getHeight()+20);
         matrix = new Matrix(myimage.getImageMatrix());
         savedMatrix = new Matrix(myimage.getImageMatrix());
-        myimage.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                // Dump touch event to log
-                //dumpEvent(event);
-                // Handle touch events here...
-                PointF curr = new PointF(event.getX(), event.getY());
-                switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
-                        savedMatrix.set(matrix);
-                        start.set(event.getX(), event.getY());
-                        Log.e(TAG, "mode=DRAG");
-                        mode = DRAG;
-                        last.set(curr);
-                        if (clickCount == 0) {
-                            startTime = System.currentTimeMillis();
-                        }
-                        clickCount++;
-                        break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        oldDist = spacing(event);
-                        Log.e(TAG, "oldDist=" + oldDist);
-                        if (oldDist > 10f) {
-                            savedMatrix.set(matrix);
-                            midPoint(mid, event);
-                            mode = ZOOM;
-                            Log.e(TAG, "mode=ZOOM");
-                        }
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        long time = System.currentTimeMillis() - startTime;
-                        if (clickCount == 2) {
-                            if (time <= MAX_DURATION) {
-                                matrix.getValues(matrixValues);
-                                float currentScale = matrixValues[Matrix.MSCALE_X];
-                                Log.e(TAG, "duoble tap, duration, current scale "+currentScale );
-                                if(maxZoom - currentScale < currentScale - minZoom){
-                                    //clsoe to maxZoom
-                                    matrix.postScale(minZoom/currentScale, minZoom/currentScale, event.getX(), event.getY());
-                                }else{
-                                    //close to minZoom
-                                    matrix.postScale(maxZoom/currentScale, maxZoom/currentScale, event.getX(), event.getY());
-                                }
-                                currentScale = matrixValues[Matrix.MSCALE_X];
-                                Log.e(TAG, "after duoble tap, duration, current scale "+currentScale );
-                                fix();
-                                currentScale = matrixValues[Matrix.MSCALE_X];
-                                Log.e(TAG, "after fix tap, duration, current scale " + currentScale);
-                            }
-                            clickCount = 0;
-                            break;
-                        }
-                        break;
-                    case MotionEvent.ACTION_POINTER_UP:
-                        mode = NONE;
-                        Log.e(TAG, "mode=NONE");
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        if (mode == DRAW) {
-                            onTouchEvent(event);
-                        }
-                        if (mode == DRAG) {
-                            float deltaX = curr.x - last.x;
-                            float deltaY = curr.y - last.y;
-                            matrix.postTranslate(deltaX, deltaY);
-                            if(deltaX > 10 || deltaY > 10) clickCount = 0;
-                            matrix.getValues(matrixValues);
-                            last.set(curr.x, curr.y);
-                            fix();
-                        } else if (mode == ZOOM) {
-                            float newDist = spacing(event);
-                            Log.e(TAG, "newDist=" + newDist + " oldDist" + oldDist);
-                            if (newDist > 10f) {
-                                matrix.set(savedMatrix);
-                                float scale = newDist / oldDist;
-                                matrix.getValues(matrixValues);
-                                float currentScale = matrixValues[Matrix.MSCALE_X];
-                                // limit zoom
-                                if (scale * currentScale > maxZoom) {
-                                    scale = maxZoom / currentScale;
-                                } else if (scale * currentScale < minZoom) {
-                                    scale = minZoom / currentScale;
-                                }
-                                matrix.postScale(scale, scale, mid.x, mid.y);
-                                fix();
-                            }
-                            clickCount = 0;
-                        }
-                        break;
-                }
-                myimage.setImageMatrix(matrix);
-                return true; // indicate event was handled
-            }
-        });
+        myimage.setOnTouchListener(image_scale);
     }
+
+    View.OnTouchListener image_scale = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            PointF curr = new PointF(event.getX(), event.getY());
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    savedMatrix.set(matrix);
+                    start.set(event.getX(), event.getY());
+                    Log.e(TAG, "mode=DRAG");
+                    mode = DRAG;
+                    last.set(curr);
+                    if (clickCount == 0) {
+                        startTime = System.currentTimeMillis();
+                    }
+                    clickCount++;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    oldDist = spacing(event);
+                    Log.e(TAG, "oldDist=" + oldDist);
+                    if (oldDist > 10f) {
+                        savedMatrix.set(matrix);
+                        midPoint(mid, event);
+                        mode = ZOOM;
+                        Log.e(TAG, "mode=ZOOM");
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    long time = System.currentTimeMillis() - startTime;
+                    if (clickCount == 2) {
+                        if (time <= MAX_DURATION) {
+                            matrix.getValues(matrixValues);
+                            float currentScale = matrixValues[Matrix.MSCALE_X];
+                            Log.e(TAG, "duoble tap, duration, current scale "+currentScale );
+                            if(maxZoom - currentScale < currentScale - minZoom){
+                                //clsoe to maxZoom
+                                matrix.postScale(minZoom/currentScale, minZoom/currentScale, event.getX(), event.getY());
+                            }else{
+                                //close to minZoom
+                                matrix.postScale(maxZoom/currentScale, maxZoom/currentScale, event.getX(), event.getY());
+                            }
+                            currentScale = matrixValues[Matrix.MSCALE_X];
+                            Log.e(TAG, "after duoble tap, duration, current scale "+currentScale );
+                            fix();
+                            currentScale = matrixValues[Matrix.MSCALE_X];
+                            Log.e(TAG, "after fix tap, duration, current scale " + currentScale);
+                        }
+                        clickCount = 0;
+                        break;
+                    }
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    mode = NONE;
+                    Log.e(TAG, "mode=NONE");
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mode == DRAW) {
+                        onTouchEvent(event);
+                    }
+                    if (mode == DRAG) {
+                        float deltaX = curr.x - last.x;
+                        float deltaY = curr.y - last.y;
+                        matrix.postTranslate(deltaX, deltaY);
+                        if(deltaX > 10 || deltaY > 10) clickCount = 0;
+                        matrix.getValues(matrixValues);
+                        last.set(curr.x, curr.y);
+                        fix();
+                    } else if (mode == ZOOM) {
+                        float newDist = spacing(event);
+                        Log.e(TAG, "newDist=" + newDist + " oldDist" + oldDist);
+                        if (newDist > 10f) {
+                            matrix.set(savedMatrix);
+                            float scale = newDist / oldDist;
+                            matrix.getValues(matrixValues);
+                            float currentScale = matrixValues[Matrix.MSCALE_X];
+                            // limit zoom
+                            if (scale * currentScale > maxZoom) {
+                                scale = maxZoom / currentScale;
+                            } else if (scale * currentScale < minZoom) {
+                                scale = minZoom / currentScale;
+                            }
+                            matrix.postScale(scale, scale, mid.x, mid.y);
+                            fix();
+                        }
+                        clickCount = 0;
+                    }
+                    break;
+            }
+            myimage.setImageMatrix(matrix);
+            return true; // indicate event was handled
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -243,15 +241,9 @@ public class MainActivity extends AppCompatActivity {
             float fix=(displayheight-imgheight/2) - globalY;
             matrix.postTranslate(0, fix);
         }
-        /*
-        float currentScale = matrixValues[Matrix.MSCALE_X];
-        // limit zoom
-        if (currentScale > maxZoom) {
-            matrix.postScale(maxZoom, maxZoom, mid.x, mid.y);
-        } else if (currentScale < minZoom) {
-            matrix.postScale(minZoom, minZoom, mid.x, mid.y);
-        }*/
     }
+
+
 
 
 }
