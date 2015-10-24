@@ -3,12 +3,38 @@
     android:layout_height="match_parent"  tools:context=".MainActivity">
 
 
+    <RelativeLayout
+        android:id="@+id/head"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="#96bcdd"
+        >
+        <ImageButton
+            android:id="@+id/hand"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:layout_alignParentLeft="true"
+            android:src="@mipmap/ic_hand"
+            android:background="#2928dd"/>
+        <ImageButton
+            android:id="@+id/marker"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:layout_toRightOf="@id/hand"
+            android:src="@mipmap/ic_marker"
+            android:background="#00000000"/>
+    </RelativeLayout>
     <ImageView
         android:id="@+id/img"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:src="@mipmap/ic_launcher"
         android:scaleType="matrix"
+        android:layout_below="@id/head"
         />
 
 </RelativeLayout>

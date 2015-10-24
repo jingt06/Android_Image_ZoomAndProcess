@@ -1,5 +1,7 @@
 package com.jingtao.imageproecess;
 
+import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -15,11 +17,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
     private static final String TAG = "Touch";
     private RelativeLayout container;
     private ImageView myimage;
@@ -83,6 +86,23 @@ public class MainActivity extends AppCompatActivity {
         matrix = new Matrix(myimage.getImageMatrix());
         savedMatrix = new Matrix(myimage.getImageMatrix());
         myimage.setOnTouchListener(image_scale);
+        final ImageButton hand_btn = (ImageButton)findViewById(R.id.hand);
+        final ImageButton marker_btn = (ImageButton)findViewById(R.id.marker);
+        hand_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myimage.setOnTouchListener(image_scale);
+                hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
+                marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
+            }
+        });
+        marker_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hand_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                marker_btn.setBackgroundColor(Color.parseColor("#2928dd"));
+            }
+        });
     }
 
     View.OnTouchListener image_scale = new View.OnTouchListener() {
