@@ -1,6 +1,7 @@
 package com.jingtao.imageproecess;
 
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -63,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
             myimage = (ImageView)findViewById(R.id.img);
             RectF drawableRect = new RectF(0, 0,width, height);
             RectF viewRect = new RectF(0, 0, container.getWidth(), container.getHeight());
-            Log.e("debug",height+" "+width + " "+container.getWidth()+" "+
-                    container.getHeight()+" "+myimage.getHeight()+" "+myimage.getWidth()+" "+
-                    +myimage.getMeasuredHeight()+" "+myimage.getMeasuredWidth());
             matrix.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
             myimage.setImageMatrix(matrix);
         }
@@ -99,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "mode=DRAG");
                         mode = DRAG;
                         last.set(curr);
-                        if(clickCount==0) {
+                        if (clickCount == 0) {
                             startTime = System.currentTimeMillis();
                         }
                         clickCount++;
@@ -116,11 +114,11 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case MotionEvent.ACTION_UP:
                         long time = System.currentTimeMillis() - startTime;
-                        if(clickCount == 2)
-                        {
-                            if(time<= MAX_DURATION)
-                            {
-                                Log.e(TAG,"duoble tap, duration: "+time);
+                        if (clickCount == 2) {
+                            if (time <= MAX_DURATION) {
+                                //float currentScale = matrixValues[Matrix.MSCALE_X];
+                                //Log.e(TAG, "duoble tap, duration: " + time);
+                                //matrix.postScale(maxZoom / currentScale, maxZoom / currentScale, mid.x, mid.y);
                             }
                             clickCount = 0;
                             break;
@@ -131,16 +129,48 @@ public class MainActivity extends AppCompatActivity {
                         Log.e(TAG, "mode=NONE");
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        if (mode == DRAW){ onTouchEvent(event);}
+                        if (mode == DRAW) {
+                            onTouchEvent(event);
+                        }
                         if (mode == DRAG) {
                             float deltaX = curr.x - last.x;
                             float deltaY = curr.y - last.y;
-                            matrix.postTranslate(deltaX,deltaY);
+                            float[] values = new float[9];
+                            matrix.postTranslate(deltaX, deltaY);
+                            clickCount = 1;
+                            matrix.getValues(matrixValues);
                             last.set(curr.x, curr.y);
-                        }
-                        else if (mode == ZOOM) {
+                            matrix.getValues(values);
+                            float globalX = values[Matrix.MTRANS_X];
+                            float globalY = values[Matrix.MTRANS_Y];
+                            float imgwidth = values[Matrix.MSCALE_X]*width;
+                            float imgheight = values[Matrix.MSCALE_Y]*height;
+                            Display display = getWindowManager().getDefaultDisplay();
+                            Point size = new Point();
+                            display.getSize(size);
+                            int displaywidth = size.x;
+                            int displayheight = size.y;
+                            Log.e(TAG, "globalX: " + globalX + " globalY:" + globalY);
+                            Log.e(TAG, "img width: " + imgwidth + " img height:" + imgheight);
+                            if(globalX< -imgwidth/2){
+                                float fix=-globalX-imgwidth/2;
+                                matrix.postTranslate(fix, 0);
+                            }
+                            if(globalY< -imgheight/2){
+                                float fix=-globalY-imgheight/2;
+                                matrix.postTranslate(0, fix);
+                            }
+                            if(displaywidth - globalX < imgwidth/2){
+                                float fix=(displaywidth-imgwidth/2) - globalX;
+                                matrix.postTranslate(fix, 0);
+                            }
+                            if(displayheight - globalY < imgheight/2){
+                                float fix=(displayheight-imgheight/2) - globalY;
+                                matrix.postTranslate(0, fix);
+                            }
+                        } else if (mode == ZOOM) {
                             float newDist = spacing(event);
-                            Log.e(TAG, "newDist=" + newDist+" oldDist"+ oldDist);
+                            Log.e(TAG, "newDist=" + newDist + " oldDist" + oldDist);
                             if (newDist > 10f) {
                                 matrix.set(savedMatrix);
                                 float scale = newDist / oldDist;
@@ -149,12 +179,13 @@ public class MainActivity extends AppCompatActivity {
                                 // limit zoom
                                 if (scale * currentScale > maxZoom) {
                                     scale = maxZoom / currentScale;
-                                }else if(scale * currentScale < minZoom){
+                                } else if (scale * currentScale < minZoom) {
                                     scale = minZoom / currentScale;
                                 }
-                                Log.e("Scale",scale+"");
+                                Log.e("Scale", scale + "");
                                 matrix.postScale(scale, scale, mid.x, mid.y);
                             }
+                            clickCount = 0;
                         }
                         break;
                 }
@@ -197,4 +228,6 @@ public class MainActivity extends AppCompatActivity {
         float y = event.getY(0) + event.getY(1);
         point.set(x / 2, y / 2);
     }
+
+
 }
