@@ -1,6 +1,9 @@
 package com.jingtao.imageproecess;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -8,6 +11,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.Image;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.FloatMath;
@@ -17,8 +22,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -26,6 +33,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "Touch";
     private RelativeLayout container;
     private ImageView myimage;
+    private int pickPicture = 0;
     //These matrices will be used to move and zoom image
     Matrix matrix = new Matrix();
     Matrix savedMatrix = new Matrix();
@@ -78,8 +86,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         myimage = (ImageView)findViewById(R.id.img);
         container = (RelativeLayout) findViewById(R.id.container);
-        maxZoom = 15;
-        minZoom = 5f;
+        maxZoom = 5f;
+        minZoom = 0.3f;
         height = myimage.getDrawable().getIntrinsicHeight()+20;
         width = myimage.getDrawable().getIntrinsicWidth()+20;
         viewRect = new RectF(0, 0, myimage.getWidth()+20, myimage.getHeight()+20);
@@ -101,6 +109,15 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 hand_btn.setBackgroundColor(Color.parseColor("#00000000"));
                 marker_btn.setBackgroundColor(Color.parseColor("#2928dd"));
+            }
+        });
+        Button select = (Button)findViewById(R.id.select);
+        select.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto, pickPicture);
             }
         });
     }
@@ -264,6 +281,30 @@ public class MainActivity extends Activity {
     }
 
 
-
+    @Override
+    protected void onActivityResult(int requestCode,int resultCode,Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        switch (requestCode) {
+            case 0://pick from gellary
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = intent.getData();
+                    Bitmap bitmap;
+                    Bitmap bitmap_large;
+                    try {
+                        bitmap_large = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+                        bitmap = Bitmap.createScaledBitmap(bitmap_large, 450, 450, true);
+                        myimage.setImageBitmap(bitmap_large);
+                        matrix = new Matrix(myimage.getImageMatrix());
+                        savedMatrix = new Matrix(myimage.getImageMatrix());
+                        height = myimage.getDrawable().getIntrinsicHeight()+20;
+                        width = myimage.getDrawable().getIntrinsicWidth()+20;
+                        fix();
+                    } catch (Exception e) {
+                        Log.e("exception", e.toString()+" OnActivityResult");
+                    }
+                }
+                break;
+        }
+    }
 
 }
