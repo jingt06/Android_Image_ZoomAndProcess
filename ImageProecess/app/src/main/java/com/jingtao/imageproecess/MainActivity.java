@@ -149,9 +149,14 @@ public class MainActivity extends Activity {
         @Override
         public boolean onTouch(View v, MotionEvent event){
             try{
-                Log.e("info", "draw:raw event.X: "+event.getRawX()+" event.Y: " +event.getRawY());
-                float touchX = event.getX()*((float)canvas_bitmap.getWidth()/(float)displaywidth);
-                float touchY = event.getY()*((float)canvas_bitmap.getHeight()/(float)displayheight);
+                float[] values = new float[9];
+                matrix.getValues(values);
+                float globalX = values[Matrix.MTRANS_X];
+                float globalY = values[Matrix.MTRANS_Y];
+                float imgwidth = values[Matrix.MSCALE_X]*width;
+                float imgheight = values[Matrix.MSCALE_Y]*height;
+                float touchX = (event.getX()-globalX)*((float)canvas_bitmap.getWidth()/imgwidth);
+                float touchY = (event.getY()-globalY)*((float)canvas_bitmap.getHeight()/imgheight);
                 Log.e("info", "draw: X: "+touchX+" Y: " +touchY);
                 Log.e("info", "draw: imagewidth: " + myimage.getWidth() + " imageheight: " +myimage.getHeight());
 
@@ -174,7 +179,6 @@ public class MainActivity extends Activity {
                 }
             //Log.e("draw",drawPath.toString());
             //redra
-            myimage.draw(canvas);
             }catch(Exception e){
                 e.printStackTrace();
             }
@@ -354,10 +358,17 @@ public class MainActivity extends Activity {
                         myimage.setImageBitmap(bitmap_large);
                         matrix = new Matrix(myimage.getImageMatrix());
                         savedMatrix = new Matrix(myimage.getImageMatrix());
+                        height = myimage.getDrawable().getIntrinsicHeight()+20;
+                        width = myimage.getDrawable().getIntrinsicWidth()+20;
                         fix();
                     } catch (Exception e) {
                         Log.e("exception", e.toString()+" OnActivityResult");
                     }
+                    final ImageButton hand_btn = (ImageButton)findViewById(R.id.hand);
+                    final ImageButton marker_btn = (ImageButton)findViewById(R.id.marker);
+                    myimage.setOnTouchListener(image_scale);
+                    hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
+                    marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
                 }
                 break;
         }
