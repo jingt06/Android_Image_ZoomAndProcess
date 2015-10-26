@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
     //drawing and canvas paint
     private Paint drawPaint, canvasPaint;
     //initial color
-    private int paintColor = 0xFF660000;
+    private String paintColor = "#ffff33";
     //canvas
     private Canvas canvas;
     //canvas bitmap
@@ -375,7 +375,8 @@ public class MainActivity extends Activity {
     }
 
     private void setPaint(){
-        drawPaint.setColor(paintColor);
+        drawPaint.setColor(Color.parseColor(paintColor));
+        drawPaint.setAlpha(100);
         drawPaint.setAntiAlias(true);
         drawPaint.setDither(true);
         drawPaint.setStyle(Paint.Style.STROKE);
