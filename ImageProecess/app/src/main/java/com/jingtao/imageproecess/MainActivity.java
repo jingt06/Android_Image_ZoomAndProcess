@@ -94,6 +94,8 @@ public class MainActivity extends Activity {
             RectF viewRect = new RectF(0, 0, container.getWidth(), container.getHeight());
             matrix.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
             myimage.setImageMatrix(matrix);
+            hide_setting();
+
         }
         //Here you can get the size!
     }
@@ -119,6 +121,7 @@ public class MainActivity extends Activity {
                 myimage.setOnTouchListener(image_scale);
                 hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                 marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                hide_setting();
             }
         });
         marker_btn.setOnClickListener(new View.OnClickListener() {
@@ -133,6 +136,7 @@ public class MainActivity extends Activity {
                 myimage.setOnTouchListener(image_draw);
                 hand_btn.setBackgroundColor(Color.parseColor("#00000000"));
                 marker_btn.setBackgroundColor(Color.parseColor("#2928dd"));
+                show_setting();
             }
         });
         Button select = (Button)findViewById(R.id.select);
@@ -144,6 +148,7 @@ public class MainActivity extends Activity {
                 startActivityForResult(pickPhoto, pickPicture);
             }
         });
+        setup_color_btns();
     }
     View.OnTouchListener image_draw = new View.OnTouchListener() {
         @Override
@@ -389,4 +394,76 @@ public class MainActivity extends Activity {
         drawPaint.setStrokeWidth(10);
     }
 
+    private void hide_setting(){
+        RelativeLayout setting = (RelativeLayout)findViewById(R.id.draw_setting);
+        RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
+        pick.setVisibility(View.GONE);
+        setting.setVisibility(View.GONE);
+    }
+    private void show_pick(){
+        RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
+        pick.setVisibility(View.VISIBLE);
+    }
+    private void hide_pick(){
+        RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
+        pick.setVisibility(View.GONE);
+    }
+    private void show_setting(){
+        RelativeLayout setting = (RelativeLayout)findViewById(R.id.draw_setting);
+        setting.setVisibility(View.VISIBLE);
+        Button pick_color = (Button) findViewById(R.id.color);
+        pick_color.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                show_pick();
+            }
+        });
+    }
+    private void setup_color_btns(){
+        final Button pick = (Button)findViewById(R.id.color);
+        ImageButton red = (ImageButton)findViewById(R.id.red);
+        red.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pick.setBackgroundColor(Color.parseColor("#ff4d4d"));
+                paintColor="#ff4d4d";
+                drawPaint.setColor(Color.parseColor(paintColor));
+                drawPaint.setAlpha(100);
+                hide_pick();
+            }
+        });
+        ImageButton yellow = (ImageButton)findViewById(R.id.yellow);
+        yellow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pick.setBackgroundColor(Color.parseColor("#ffff33"));
+                paintColor="#ffff33";
+                drawPaint.setColor(Color.parseColor(paintColor));
+                drawPaint.setAlpha(100);
+                hide_pick();
+            }
+        });
+        ImageButton blue = (ImageButton)findViewById(R.id.blue);
+        blue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pick.setBackgroundColor(Color.parseColor("#4d4dff"));
+                paintColor="#4d4dff";
+                drawPaint.setColor(Color.parseColor(paintColor));
+                drawPaint.setAlpha(100);
+                hide_pick();
+            }
+        });
+        ImageButton black = (ImageButton)findViewById(R.id.black);
+        black.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pick.setBackgroundColor(Color.parseColor("#262626"));
+                paintColor="#262626";
+                drawPaint.setColor(Color.parseColor(paintColor));
+                drawPaint.setAlpha(100);
+                hide_pick();
+            }
+        });
+    }
 }
