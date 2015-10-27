@@ -153,8 +153,8 @@ public class MainActivity extends Activity {
                 matrix.getValues(values);
                 float globalX = values[Matrix.MTRANS_X];
                 float globalY = values[Matrix.MTRANS_Y];
-                float imgwidth = values[Matrix.MSCALE_X]*width;
-                float imgheight = values[Matrix.MSCALE_Y]*height;
+                float imgwidth = values[Matrix.MSCALE_X]*(width-20);
+                float imgheight = values[Matrix.MSCALE_Y]*(height-20);
                 float touchX = (event.getX()-globalX)*((float)canvas_bitmap.getWidth()/imgwidth);
                 float touchY = (event.getY()-globalY)*((float)canvas_bitmap.getHeight()/imgheight);
                 Log.e("info", "draw: X: "+touchX+" Y: " +touchY);
@@ -167,6 +167,10 @@ public class MainActivity extends Activity {
                         break;
                     case MotionEvent.ACTION_MOVE:
                         drawPath.lineTo(touchX, touchY);
+                        //canvas.drawPath(drawPath, drawPaint);
+                        //myimage.setImageBitmap(canvas_bitmap);
+                        //drawPath.reset();
+                        //drawPath.moveTo(touchX, touchY);
                         break;
                     case MotionEvent.ACTION_UP:
                         drawPath.lineTo(touchX, touchY);
