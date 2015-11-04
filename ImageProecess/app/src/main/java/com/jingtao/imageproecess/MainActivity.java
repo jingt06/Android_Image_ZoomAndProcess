@@ -85,9 +85,9 @@ public class MainActivity extends Activity {
     //initial color
     private String paintColor = "#ffff33";
     //canvas
-    private Canvas canvas;
+    private Canvas canvas,origin_canvas;
     //canvas bitmap
-    private Bitmap canvas_bitmap;
+    private Bitmap canvas_bitmap,origin_bitmap;
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -132,6 +132,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 Bitmap workingBipmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
                 canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
+                origin_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
                 canvas = new Canvas(canvas_bitmap);
                 drawPath = new Path();
                 drawPaint = new Paint();
@@ -151,7 +152,7 @@ public class MainActivity extends Activity {
                 startActivityForResult(pickPhoto, pickPicture);
             }
         });
-        setup_color_btns();
+        setup_btns();
     }
     View.OnTouchListener image_draw = new View.OnTouchListener() {
         @Override
@@ -440,13 +441,13 @@ public class MainActivity extends Activity {
             }
         });
     }
-    private void setup_color_btns(){
+    private void setup_btns(){
         SeekBar pen_width = (SeekBar)findViewById(R.id.pen_width_sb);
         pen_width.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        penWidth=progress;
+                        penWidth = progress;
                         drawPaint.setStrokeWidth(penWidth);
                     }
 
@@ -503,6 +504,15 @@ public class MainActivity extends Activity {
                 drawPaint.setColor(Color.parseColor(paintColor));
                 drawPaint.setAlpha(100);
                 hide_pick();
+            }
+        });
+        Button reset_canvas = (Button)findViewById(R.id.resetDraw);
+        reset_canvas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                canvas_bitmap=origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                myimage.setImageBitmap(canvas_bitmap);
+                canvas = new Canvas(canvas_bitmap);
             }
         });
     }

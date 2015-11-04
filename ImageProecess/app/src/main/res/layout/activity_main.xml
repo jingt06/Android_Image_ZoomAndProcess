@@ -59,12 +59,20 @@
             android:layout_alignParentLeft="true"/>
         <Button
             android:id="@+id/pen_width_setting"
-            android:text="Pen Width"
+            android:text="Pen"
             android:background="#00000000"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_toRightOf="@id/color"/>
 
+        <Button
+            android:id="@+id/resetDraw"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:text="Reset"
+            android:background="#00000000"
+            />
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/color_pick"
