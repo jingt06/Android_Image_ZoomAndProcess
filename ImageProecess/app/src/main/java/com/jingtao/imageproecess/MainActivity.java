@@ -32,6 +32,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -66,6 +67,8 @@ public class MainActivity extends Activity {
     private int displaywidth;
     private int displayheight;
     private PointF last = new PointF();
+
+    private int penWidth=10;
 
     //variable for counting two successive up-down events
     int clickCount = 0;
@@ -391,18 +394,29 @@ public class MainActivity extends Activity {
         drawPaint.setStyle(Paint.Style.STROKE);
         drawPaint.setStrokeJoin(Paint.Join.ROUND);
         drawPaint.setStrokeCap(Paint.Cap.ROUND);
-        drawPaint.setStrokeWidth(10);
+        drawPaint.setStrokeWidth(penWidth);
     }
 
     private void hide_setting(){
         RelativeLayout setting = (RelativeLayout)findViewById(R.id.draw_setting);
         RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
+        SeekBar pen_width = (SeekBar)findViewById(R.id.pen_width_sb);
         pick.setVisibility(View.GONE);
         setting.setVisibility(View.GONE);
+        pen_width.setVisibility(View.GONE);
     }
     private void show_pick(){
         RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
         pick.setVisibility(View.VISIBLE);
+        SeekBar pen_width = (SeekBar)findViewById(R.id.pen_width_sb);
+        pen_width.setVisibility(View.GONE);
+    }
+    private void show_pen_width(){
+        SeekBar pen_width = (SeekBar)findViewById(R.id.pen_width_sb);
+        pen_width.setVisibility(View.VISIBLE);
+        pen_width.setProgress(penWidth);
+        RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
+        pick.setVisibility(View.GONE);
     }
     private void hide_pick(){
         RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
@@ -418,8 +432,34 @@ public class MainActivity extends Activity {
                 show_pick();
             }
         });
+        Button width_setting = (Button)findViewById(R.id.pen_width_setting);
+        width_setting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                show_pen_width();
+            }
+        });
     }
     private void setup_color_btns(){
+        SeekBar pen_width = (SeekBar)findViewById(R.id.pen_width_sb);
+        pen_width.setOnSeekBarChangeListener(
+                new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        penWidth=progress;
+                        drawPaint.setStrokeWidth(penWidth);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                    }
+                }
+        );
         final Button pick = (Button)findViewById(R.id.color);
         ImageButton red = (ImageButton)findViewById(R.id.red);
         red.setOnClickListener(new View.OnClickListener() {
