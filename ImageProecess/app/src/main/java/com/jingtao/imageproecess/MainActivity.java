@@ -87,7 +87,7 @@ public class MainActivity extends Activity {
     //canvas
     private Canvas canvas,origin_canvas;
     //canvas bitmap
-    private Bitmap canvas_bitmap,origin_bitmap;
+    private Bitmap canvas_bitmap,origin_bitmap,previous_bitmap;
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -117,6 +117,7 @@ public class MainActivity extends Activity {
         savedMatrix = new Matrix(myimage.getImageMatrix());
         myimage.setOnTouchListener(image_scale);
         origin_bitmap=((BitmapDrawable)myimage.getDrawable()).getBitmap();
+        previous_bitmap=origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
         final ImageButton hand_btn = (ImageButton)findViewById(R.id.hand);
         final ImageButton marker_btn = (ImageButton)findViewById(R.id.marker);
         hand_btn.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +183,7 @@ public class MainActivity extends Activity {
                         //drawPath.moveTo(touchX, touchY);
                         break;
                     case MotionEvent.ACTION_UP:
+                        previous_bitmap=canvas_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                         drawPath.lineTo(touchX, touchY);
                         canvas.drawPath(drawPath, drawPaint);
                         myimage.setImageBitmap(canvas_bitmap);
@@ -511,7 +513,17 @@ public class MainActivity extends Activity {
         reset_canvas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                previous_bitmap=canvas_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                 canvas_bitmap=origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                myimage.setImageBitmap(canvas_bitmap);
+                canvas = new Canvas(canvas_bitmap);
+            }
+        });
+        Button undo_btn = (Button)findViewById(R.id.undo);
+        undo_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                canvas_bitmap=previous_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                 myimage.setImageBitmap(canvas_bitmap);
                 canvas = new Canvas(canvas_bitmap);
             }
