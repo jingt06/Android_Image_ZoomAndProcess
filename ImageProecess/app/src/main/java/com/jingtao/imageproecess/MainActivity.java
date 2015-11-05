@@ -116,6 +116,7 @@ public class MainActivity extends Activity {
         matrix = new Matrix(myimage.getImageMatrix());
         savedMatrix = new Matrix(myimage.getImageMatrix());
         myimage.setOnTouchListener(image_scale);
+        origin_bitmap=((BitmapDrawable)myimage.getDrawable()).getBitmap();
         final ImageButton hand_btn = (ImageButton)findViewById(R.id.hand);
         final ImageButton marker_btn = (ImageButton)findViewById(R.id.marker);
         hand_btn.setOnClickListener(new View.OnClickListener() {
@@ -132,7 +133,6 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 Bitmap workingBipmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
                 canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
-                origin_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
                 canvas = new Canvas(canvas_bitmap);
                 drawPath = new Path();
                 drawPaint = new Paint();
@@ -382,6 +382,7 @@ public class MainActivity extends Activity {
                     myimage.setOnTouchListener(image_scale);
                     hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                     marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                    origin_bitmap=((BitmapDrawable)myimage.getDrawable()).getBitmap();
                 }
                 break;
         }
