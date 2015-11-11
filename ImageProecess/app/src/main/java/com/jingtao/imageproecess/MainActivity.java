@@ -51,6 +51,7 @@ public class MainActivity extends Activity {
     static final int DRAW =3;
     int mode = NONE;
 
+    private int x,y,a,b;
 
     // Remember some things for zooming
     PointF start = new PointF();
@@ -98,6 +99,7 @@ public class MainActivity extends Activity {
             matrix.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
             myimage.setImageMatrix(matrix);
             hide_setting();
+            hide_crop();
 
         }
         //Here you can get the size!
@@ -120,28 +122,78 @@ public class MainActivity extends Activity {
         previous_bitmap=origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
         final ImageButton hand_btn = (ImageButton)findViewById(R.id.hand);
         final ImageButton marker_btn = (ImageButton)findViewById(R.id.marker);
+        final ImageButton crop_btn = (ImageButton)findViewById(R.id.crop);
+        crop_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(canvas == null){
+                    Bitmap workingBipmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
+                    canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
+                    canvas = new Canvas(canvas_bitmap);
+                }
+                hand_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                crop_btn.setBackgroundColor(Color.parseColor("#2928dd"));
+                marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                hide_setting();
+                x = canvas.getWidth() / 3;
+                y = canvas.getHeight() / 3;
+                a = canvas.getWidth() * 2 / 3;
+                b = canvas.getHeight() * 2 / 3;
+                Paint shadow = new Paint();
+                shadow.setStyle(Paint.Style.FILL);
+                shadow.setColor(Color.parseColor("#000000"));
+                shadow.setStrokeWidth(50);
+                shadow.setAlpha(80);
+                canvas.drawRect(1, 1, canvas.getWidth(), canvas.getHeight(), shadow);
+
+                Paint rec = new Paint();
+                rec.setStyle(Paint.Style.FILL);
+                rec.setColor(Color.parseColor("#ffffff"));
+                rec.setStrokeWidth(50);
+                rec.setAlpha(110);
+
+                canvas.drawRect(x,y,a,b, rec);
+
+                Paint frame = new Paint();
+                frame.setStyle(Paint.Style.STROKE);
+                frame.setColor(Color.parseColor("#000000"));
+                frame.setStrokeWidth(20);
+                frame.setAlpha(130);
+                canvas.drawRect(x,y,a,b, frame);
+                myimage.setImageBitmap(canvas_bitmap);
+                myimage.setOnTouchListener(image_crop);
+                hide_setting();
+                show_crop();
+            }
+        });
         hand_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 myimage.setOnTouchListener(image_scale);
                 hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                 marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                crop_btn.setBackgroundColor(Color.parseColor("#00000000"));
                 hide_setting();
+                hide_crop();
             }
         });
         marker_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap workingBipmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
-                canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
-                canvas = new Canvas(canvas_bitmap);
+                if(canvas == null){
+                    Bitmap workingBipmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
+                    canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
+                    canvas = new Canvas(canvas_bitmap);
+                }
                 drawPath = new Path();
                 drawPaint = new Paint();
                 setPaint();
                 myimage.setOnTouchListener(image_draw);
                 hand_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                crop_btn.setBackgroundColor(Color.parseColor("#00000000"));
                 marker_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                 show_setting();
+                hide_crop();
             }
         });
         Button select = (Button)findViewById(R.id.select);
@@ -155,6 +207,13 @@ public class MainActivity extends Activity {
         });
         setup_btns();
     }
+
+    View.OnTouchListener image_crop = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            return true;
+        }
+    };
     View.OnTouchListener image_draw = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event){
@@ -381,10 +440,14 @@ public class MainActivity extends Activity {
                     }
                     final ImageButton hand_btn = (ImageButton)findViewById(R.id.hand);
                     final ImageButton marker_btn = (ImageButton)findViewById(R.id.marker);
+                    final ImageButton crop_btn = (ImageButton)findViewById(R.id.crop);
                     myimage.setOnTouchListener(image_scale);
                     hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                     marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
-                    origin_bitmap=((BitmapDrawable)myimage.getDrawable()).getBitmap();
+                    crop_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                    origin_bitmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
+                    canvas_bitmap = origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    canvas = new Canvas(canvas_bitmap);
                 }
                 break;
         }
@@ -399,6 +462,16 @@ public class MainActivity extends Activity {
         drawPaint.setStrokeJoin(Paint.Join.ROUND);
         drawPaint.setStrokeCap(Paint.Cap.ROUND);
         drawPaint.setStrokeWidth(penWidth);
+    }
+
+    private void hide_crop(){
+        RelativeLayout crop = (RelativeLayout)findViewById(R.id.crop_saving);
+        crop.setVisibility(View.GONE);
+    }
+
+    private void show_crop(){
+        RelativeLayout crop = (RelativeLayout)findViewById(R.id.crop_saving);
+        crop.setVisibility(View.VISIBLE);
     }
 
     private void hide_setting(){
@@ -526,15 +599,6 @@ public class MainActivity extends Activity {
                 canvas_bitmap=previous_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                 myimage.setImageBitmap(canvas_bitmap);
                 canvas = new Canvas(canvas_bitmap);
-            }
-        });
-        Button crop_btn = (Button)findViewById(R.id.CropImage);
-        crop_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CropImage.class);
-                intent.putExtra("bitmap",canvas_bitmap);
-                startActivity(intent);
             }
         });
     }

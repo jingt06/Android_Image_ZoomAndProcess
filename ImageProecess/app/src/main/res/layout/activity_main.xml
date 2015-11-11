@@ -13,7 +13,7 @@
         >
         <ImageButton
             android:id="@+id/hand"
-            android:layout_width="80dp"
+            android:layout_width="60dp"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
             android:layout_alignParentLeft="true"
@@ -21,16 +21,24 @@
             android:background="#2928dd"/>
         <ImageButton
             android:id="@+id/marker"
-            android:layout_width="80dp"
+            android:layout_width="60dp"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
             android:layout_toRightOf="@id/hand"
             android:src="@mipmap/ic_marker"
             android:background="#00000000"/>
+        <ImageButton
+            android:id="@+id/crop"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:layout_toRightOf="@id/marker"
+            android:src="@mipmap/ic_crop"
+            android:background="#00000000"/>
         <Button
             android:id="@+id/select"
             android:layout_alignParentRight="true"
-            android:layout_toRightOf="@id/marker"
+            android:layout_toRightOf="@id/crop"
             android:background="#00000000"
             android:text="Select Image"
             android:layout_width="match_parent"
@@ -72,14 +80,6 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
-        <Button
-            android:id="@+id/CropImage"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="Crop"
-            android:background="#00000000"
-            />
 
 
         <Button
@@ -124,10 +124,29 @@
             android:layout_toRightOf="@id/blue"/>
     </RelativeLayout>
 
+
     <SeekBar
         android:id="@+id/pen_width_sb"
         android:layout_width="fill_parent"
         android:layout_height="20dp"
         android:secondaryProgress="20"
         android:layout_above="@id/draw_setting"/>
+    <RelativeLayout
+        android:id="@+id/crop_saving"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        >
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Save"
+            android:layout_alignParentLeft="true"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Cancel"
+            android:layout_alignParentRight="true"/>
+        </RelativeLayout>
+
 </RelativeLayout>
