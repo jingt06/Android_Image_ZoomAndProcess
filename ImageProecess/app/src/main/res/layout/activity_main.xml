@@ -44,7 +44,7 @@
         android:scaleType="matrix"
         android:layout_below="@id/head"
         />
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/draw_setting"
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -54,8 +54,8 @@
             android:id="@+id/undo"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
             android:text="Undo"
-            android:layout_alignParentLeft="true"
             android:background="#00000000"/>
         <Button
             android:id="@+id/color"
@@ -63,24 +63,33 @@
             android:background="#80ffff33"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_toRightOf="@id/undo"/>
+            android:layout_weight="1"
+            />
         <Button
             android:id="@+id/pen_width_setting"
             android:text="Width"
             android:background="#00000000"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_toRightOf="@id/color"/>
+            android:layout_weight="1"/>
+        <Button
+            android:id="@+id/CropImage"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Crop"
+            android:background="#00000000"
+            />
+
 
         <Button
             android:id="@+id/resetDraw"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
+            android:layout_weight="1"
             android:text="Reset"
-            android:background="#00000000"
-            />
-    </RelativeLayout>
+            android:background="#00000000"/>
+    </LinearLayout>
     <RelativeLayout
         android:id="@+id/color_pick"
         android:layout_width="match_parent"

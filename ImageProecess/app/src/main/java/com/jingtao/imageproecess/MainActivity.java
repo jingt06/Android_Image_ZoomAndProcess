@@ -402,7 +402,7 @@ public class MainActivity extends Activity {
     }
 
     private void hide_setting(){
-        RelativeLayout setting = (RelativeLayout)findViewById(R.id.draw_setting);
+        LinearLayout setting = (LinearLayout)findViewById(R.id.draw_setting);
         RelativeLayout pick = (RelativeLayout)findViewById(R.id.color_pick);
         SeekBar pen_width = (SeekBar)findViewById(R.id.pen_width_sb);
         pick.setVisibility(View.GONE);
@@ -427,7 +427,7 @@ public class MainActivity extends Activity {
         pick.setVisibility(View.GONE);
     }
     private void show_setting(){
-        RelativeLayout setting = (RelativeLayout)findViewById(R.id.draw_setting);
+        LinearLayout setting = (LinearLayout)findViewById(R.id.draw_setting);
         setting.setVisibility(View.VISIBLE);
         Button pick_color = (Button) findViewById(R.id.color);
         pick_color.setOnClickListener(new View.OnClickListener() {
@@ -526,6 +526,15 @@ public class MainActivity extends Activity {
                 canvas_bitmap=previous_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                 myimage.setImageBitmap(canvas_bitmap);
                 canvas = new Canvas(canvas_bitmap);
+            }
+        });
+        Button crop_btn = (Button)findViewById(R.id.CropImage);
+        crop_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, CropImage.class);
+                intent.putExtra("bitmap",canvas_bitmap);
+                startActivity(intent);
             }
         });
     }
