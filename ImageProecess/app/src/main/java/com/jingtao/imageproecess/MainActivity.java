@@ -35,6 +35,9 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 public class MainActivity extends Activity {
     private static final String TAG = "Touch";
     private RelativeLayout container;
@@ -82,13 +85,14 @@ public class MainActivity extends Activity {
 
     private Path drawPath;
     //drawing and canvas paint
-    private Paint drawPaint, canvasPaint;
+    private Paint drawPaint, canvasPaint, shadow, rec, frame;
     //initial color
     private String paintColor = "#ffff33";
     //canvas
-    private Canvas canvas,origin_canvas;
+    private Canvas canvas,origin_canvas,crop_canvas;
     //canvas bitmap
-    private Bitmap canvas_bitmap,origin_bitmap,previous_bitmap;
+    private Bitmap canvas_bitmap,origin_bitmap,previous_bitmap,crop_bitmap;
+
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -131,6 +135,9 @@ public class MainActivity extends Activity {
                     canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
                     canvas = new Canvas(canvas_bitmap);
                 }
+                crop_bitmap = canvas_bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                crop_canvas = new Canvas(crop_bitmap);
+
                 hand_btn.setBackgroundColor(Color.parseColor("#00000000"));
                 crop_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                 marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
@@ -139,28 +146,27 @@ public class MainActivity extends Activity {
                 y = canvas.getHeight() / 3;
                 a = canvas.getWidth() * 2 / 3;
                 b = canvas.getHeight() * 2 / 3;
-                Paint shadow = new Paint();
+                shadow = new Paint();
                 shadow.setStyle(Paint.Style.FILL);
                 shadow.setColor(Color.parseColor("#000000"));
                 shadow.setStrokeWidth(50);
                 shadow.setAlpha(80);
-                canvas.drawRect(1, 1, canvas.getWidth(), canvas.getHeight(), shadow);
+                crop_canvas.drawRect(1, 1, canvas.getWidth(), canvas.getHeight(), shadow);
 
-                Paint rec = new Paint();
+                rec = new Paint();
                 rec.setStyle(Paint.Style.FILL);
                 rec.setColor(Color.parseColor("#ffffff"));
                 rec.setStrokeWidth(50);
                 rec.setAlpha(110);
+                crop_canvas.drawRect(x, y, a, b, rec);
 
-                canvas.drawRect(x,y,a,b, rec);
-
-                Paint frame = new Paint();
+                frame = new Paint();
                 frame.setStyle(Paint.Style.STROKE);
                 frame.setColor(Color.parseColor("#000000"));
                 frame.setStrokeWidth(20);
                 frame.setAlpha(130);
-                canvas.drawRect(x,y,a,b, frame);
-                myimage.setImageBitmap(canvas_bitmap);
+                crop_canvas.drawRect(x,y,a,b, frame);
+                myimage.setImageBitmap(crop_bitmap);
                 myimage.setOnTouchListener(image_crop);
                 hide_setting();
                 show_crop();
@@ -169,6 +175,13 @@ public class MainActivity extends Activity {
         hand_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(canvas_bitmap==null) {
+                    Bitmap workingBipmap = ((BitmapDrawable) myimage.getDrawable()).getBitmap();
+                    canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
+                    canvas = new Canvas(canvas_bitmap);
+                }else{
+                    myimage.setImageBitmap(canvas_bitmap);
+                }
                 myimage.setOnTouchListener(image_scale);
                 hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                 marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
@@ -180,10 +193,12 @@ public class MainActivity extends Activity {
         marker_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(canvas == null){
-                    Bitmap workingBipmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
+                if(canvas_bitmap==null) {
+                    Bitmap workingBipmap = ((BitmapDrawable) myimage.getDrawable()).getBitmap();
                     canvas_bitmap = workingBipmap.copy(Bitmap.Config.ARGB_8888, true);
                     canvas = new Canvas(canvas_bitmap);
+                }else{
+                    myimage.setImageBitmap(canvas_bitmap);
                 }
                 drawPath = new Path();
                 drawPaint = new Paint();
@@ -208,9 +223,60 @@ public class MainActivity extends Activity {
         setup_btns();
     }
 
+    private float getTouchX(float touchx){
+        float[] values = new float[9];
+        matrix.getValues(values);
+        float globalX = values[Matrix.MTRANS_X];
+        float imgwidth = values[Matrix.MSCALE_X]*(width-20);
+        return (touchx-globalX)*((float)canvas_bitmap.getWidth()/imgwidth);
+    }
+
+
+    private float getTouchY(float touchy){
+        float[] values = new float[9];
+        matrix.getValues(values);
+        float globalY = values[Matrix.MTRANS_Y];
+        float imgheight = values[Matrix.MSCALE_Y]*(height-20);
+        return (touchy-globalY)*((float)canvas_bitmap.getHeight()/imgheight);
+    }
+
     View.OnTouchListener image_crop = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            PointF curr = new PointF(event.getX(),event.getY());
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    start.set(event.getX(), event.getY());
+                    last.set(curr);
+                    float touch_x = getTouchX(curr.x);
+                    float touch_y = getTouchY(curr.y);
+                    Log.e("MOTION","x: "+x+"  y:"+y +"  a:"+a+"  b:"+b+" X "+curr.x+" Y"+curr.y+" TX:"+touch_x+" TY:"+touch_y);
+                    if(touch_x > x && touch_y > y && touch_x < a && touch_y < b){
+                        mode = DRAG;
+                    }else{
+                        mode = NONE;
+                    }
+
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (mode == DRAG) {
+                        float dX = curr.x - last.x;
+                        float dY = curr.y - last.y;
+                        x=x+(int)dX;
+                        a=a+(int)dX;
+                        y=y+(int)dY;
+                        b=b+(int)dY;
+                        crop_bitmap = canvas_bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                        crop_canvas = new Canvas(crop_bitmap);
+                        crop_canvas.drawRect(1, 1, canvas.getWidth(), canvas.getHeight(), shadow);
+                        crop_canvas.drawRect(x, y, a, b, rec);
+                        crop_canvas.drawRect(x,y,a,b, frame);
+                        myimage.setImageBitmap(crop_bitmap);
+
+
+                    }
+                    break;
+            }
             return true;
         }
     };
@@ -445,7 +511,11 @@ public class MainActivity extends Activity {
                     hand_btn.setBackgroundColor(Color.parseColor("#2928dd"));
                     marker_btn.setBackgroundColor(Color.parseColor("#00000000"));
                     crop_btn.setBackgroundColor(Color.parseColor("#00000000"));
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
                     origin_bitmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
+                    origin_bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+                    origin_bitmap = decoded.copy(Bitmap.Config.ARGB_8888, true);
                     canvas_bitmap = origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                     canvas = new Canvas(canvas_bitmap);
                 }
