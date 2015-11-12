@@ -292,11 +292,36 @@ public class MainActivity extends Activity {
                 float imgheight = values[Matrix.MSCALE_Y]*(height-20);
                 float touchX = (event.getX()-globalX)*((float)canvas_bitmap.getWidth()/imgwidth);
                 float touchY = (event.getY()-globalY)*((float)canvas_bitmap.getHeight()/imgheight);
-                Log.e("info", "draw: X: "+touchX+" Y: " +touchY);
-                Log.e("info", "draw: imagewidth: " + myimage.getWidth() + " imageheight: " +myimage.getHeight());
+                Log.e("info", "draw: X: " + touchX + " Y: " + touchY);
+                Log.e("info", "draw: imagewidth: " + myimage.getWidth() + " imageheight: " + myimage.getHeight());
 
-                //respond to down, move and up events
+                float touch_x = getTouchX(event.getX());
+                float touch_y = getTouchY(event.getY());
+                PointF curr = new PointF(touch_x,touch_y);
                 switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        start.set(touch_x, touch_y);
+                        last.set(curr);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        canvas.drawLine(last.x,last.y,curr.x,curr.y,drawPaint);
+                        last.set(curr);
+                        //canvas.drawPath(drawPath, drawPaint);
+                        //myimage.setImageBitmap(canvas_bitmap);
+                        //drawPath.reset();
+                        //drawPath.moveTo(touchX, touchY);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        canvas.drawLine(last.x,last.y,curr.x,curr.y,drawPaint);
+                        last.set(curr);
+                        break;
+                    default:
+                        return false;
+                }
+
+                myimage.setImageBitmap(canvas_bitmap);
+                //respond to down, move and up events
+                /*switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         drawPath.moveTo(touchX, touchY);
                         break;
@@ -316,7 +341,7 @@ public class MainActivity extends Activity {
                         break;
                     default:
                         return false;
-                }
+                }*/
             //Log.e("draw",drawPath.toString());
             //redra
             }catch(Exception e){
