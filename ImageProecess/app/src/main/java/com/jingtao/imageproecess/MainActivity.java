@@ -513,9 +513,6 @@ public class MainActivity extends Activity {
                     crop_btn.setBackgroundColor(Color.parseColor("#00000000"));
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     origin_bitmap = ((BitmapDrawable)myimage.getDrawable()).getBitmap();
-                    origin_bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                    Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
-                    origin_bitmap = decoded.copy(Bitmap.Config.ARGB_8888, true);
                     canvas_bitmap = origin_bitmap.copy(Bitmap.Config.ARGB_8888, true);
                     canvas = new Canvas(canvas_bitmap);
                 }
